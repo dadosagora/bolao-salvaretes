@@ -1,8 +1,8 @@
 // Lógica principal do Bolão Salvaretes
-// Agora com:
-// - apostas de 6 ou 7 números
-// - auto-avance ao digitar 2 dígitos
-// - salvando tudo em localStorage
+// - Apostas com 6 ou 7 números (mínimo 6, sem repetir)
+// - Auto-avance ao digitar 2 dígitos
+// - Salva tudo em localStorage
+// - Card de "Números mais jogados"
 
 const nomeInput = document.getElementById("nome-participante");
 const apostaInputs = Array.from(document.querySelectorAll(".aposta-num"));
@@ -36,7 +36,7 @@ function mostrarErro(msg) {
 function setupAutoAdvance(inputs) {
   inputs.forEach((input, idx) => {
     input.addEventListener("input", (e) => {
-      let v = e.target.value.replace(/\D/g, ""); // garante só dígitos
+      let v = e.target.value.replace(/\D/g, ""); // só dígitos
       if (v.length > 2) v = v.slice(0, 2);
       e.target.value = v;
 
@@ -105,7 +105,6 @@ function obterNumerosAposta() {
     throw new Error("Não é permitido repetir números na mesma aposta.");
   }
 
-  // ordena antes de salvar
   return numeros.sort((a, b) => a - b);
 }
 
@@ -247,6 +246,7 @@ function editarAposta(id) {
   salvarApostas();
   atualizarListaApostas();
   atualizarResultadoResumo();
+  atualizarFrequenciaNumeros();
 }
 
 function excluirAposta(id) {
@@ -254,6 +254,7 @@ function excluirAposta(id) {
   salvarApostas();
   atualizarListaApostas();
   atualizarResultadoResumo();
+  atualizarFrequenciaNumeros();
 }
 
 // ---------- RESULTADO / RESUMO ----------
@@ -346,6 +347,61 @@ function atualizarResultadoResumo() {
   resultadoEl.appendChild(resumoEl);
 }
 
+// ---------- FREQUÊNCIA DE NÚMEROS ----------
+function atualizarFrequenciaNumeros() {
+  const lista = document.getElementById("lista-frequencia");
+  const totalSpan = document.getElementById("total-numeros-usados");
+  if (!lista || !totalSpan) return;
+
+  lista.innerHTML = "";
+
+  if (apostas.length === 0) {
+    totalSpan.textContent = "0 nºs";
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent =
+      "Os números mais jogados vão aparecer aqui depois que você cadastrar as apostas.";
+    lista.appendChild(p);
+    return;
+  }
+
+  const freq = new Map();
+
+  apostas.forEach((a) => {
+    a.numeros.forEach((n) => {
+      freq.set(n, (freq.get(n) || 0) + 1);
+    });
+  });
+
+  const totalNumeros = Array.from(freq.values()).reduce((soma, v) => soma + v, 0);
+  totalSpan.textContent = `${totalNumeros} nºs`;
+
+  const ordenados = Array.from(freq.entries()).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1]; // mais frequente primeiro
+    return a[0] - b[0]; // em empate, menor número primeiro
+  });
+
+  const top = ordenados.slice(0, 15); // mostra até 15 nºs
+
+  top.forEach(([numero, qtd]) => {
+    const item = document.createElement("div");
+    item.className = "freq-item";
+
+    const numSpan = document.createElement("span");
+    numSpan.className = "freq-item-num";
+    numSpan.textContent = String(numero).padStart(2, "0");
+
+    const countSpan = document.createElement("span");
+    countSpan.className = "freq-item-count";
+    countSpan.textContent = `${qtd}x`;
+
+    item.appendChild(numSpan);
+    item.appendChild(countSpan);
+
+    lista.appendChild(item);
+  });
+}
+
 // ---------- EVENTOS ----------
 btnAdicionar.addEventListener("click", () => {
   limparMensagemErro();
@@ -369,6 +425,7 @@ btnAdicionar.addEventListener("click", () => {
     limparCamposAposta();
     atualizarListaApostas();
     atualizarResultadoResumo();
+    atualizarFrequenciaNumeros();
   } catch (err) {
     mostrarErro(err.message);
   }
@@ -392,6 +449,7 @@ btnCalcular.addEventListener("click", () => {
     salvarApostas();
     atualizarListaApostas();
     atualizarResultadoResumo();
+    // frequência não muda aqui
   } catch (err) {
     mostrarErro(err.message);
   }
@@ -401,3 +459,4 @@ btnCalcular.addEventListener("click", () => {
 carregarApostas();
 atualizarListaApostas();
 atualizarResultadoResumo();
+atualizarFrequenciaNumeros();
