@@ -1,5 +1,8 @@
 // Lógica principal do Bolão Salvaretes
-// Tudo em memória (não salva no servidor)
+// Agora com:
+// - apostas de 6 ou 7 números
+// - auto-avance ao digitar 2 dígitos
+// - salvando tudo em localStorage
 
 const nomeInput = document.getElementById("nome-participante");
 const apostaInputs = Array.from(document.querySelectorAll(".aposta-num"));
@@ -14,9 +17,11 @@ const totalApostasEl = document.getElementById("total-apostas");
 const resultadoEl = document.getElementById("resultado");
 const mensagemErroEl = document.getElementById("mensagem-erro");
 
+const STORAGE_KEY = "bolaoSalvaretes_v1";
+
 let apostas = []; // { id, nome, numeros: [..], acertos: null }
 
-// Funções utilitárias
+// ---------- UTILITÁRIOS DE ERRO ----------
 function limparMensagemErro() {
   mensagemErroEl.textContent = "";
   mensagemErroEl.style.color = "var(--muted)";
@@ -27,35 +32,114 @@ function mostrarErro(msg) {
   mensagemErroEl.style.color = "#fecaca";
 }
 
-function obterNumerosValidos(inputs, qtdEsperada) {
-  const valores = inputs.map((input) => input.value.trim());
-  if (valores.some((v) => v === "")) {
-    throw new Error("Preencha todos os números.");
+// ---------- AUTO-AVANÇAR CAMPOS (2 DÍGITOS) ----------
+function setupAutoAdvance(inputs) {
+  inputs.forEach((input, idx) => {
+    input.addEventListener("input", (e) => {
+      let v = e.target.value.replace(/\D/g, ""); // garante só dígitos
+      if (v.length > 2) v = v.slice(0, 2);
+      e.target.value = v;
+
+      if (v.length === 2 && idx < inputs.length - 1) {
+        inputs[idx + 1].focus();
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && e.target.value === "" && idx > 0) {
+        inputs[idx - 1].focus();
+      }
+    });
+  });
+}
+
+setupAutoAdvance(apostaInputs);
+setupAutoAdvance(sorteioInputs);
+
+// ---------- LOCALSTORAGE ----------
+function salvarApostas() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(apostas));
+  } catch (e) {
+    console.warn("Não foi possível salvar no localStorage:", e);
+  }
+}
+
+function carregarApostas() {
+  try {
+    const salvo = localStorage.getItem(STORAGE_KEY);
+    if (!salvo) return;
+    const dados = JSON.parse(salvo);
+    if (Array.isArray(dados)) {
+      apostas = dados;
+    }
+  } catch (e) {
+    console.warn("Não foi possível carregar do localStorage:", e);
+  }
+}
+
+// ---------- VALIDAÇÃO DOS NÚMEROS ----------
+
+// APOSTA: aceita 6 ou 7 números, sem repetir
+function obterNumerosAposta() {
+  const valores = apostaInputs
+    .map((input) => input.value.trim())
+    .filter((v) => v !== "");
+
+  if (valores.length < 6) {
+    throw new Error("Informe pelo menos 6 números para a aposta.");
   }
 
   const numeros = valores.map((v) => Number(v));
 
   if (numeros.some((n) => Number.isNaN(n))) {
-    throw new Error("Todos os campos devem conter números.");
+    throw new Error("Todos os campos da aposta devem conter números.");
   }
 
   if (numeros.some((n) => n < 1 || n > 60)) {
-    throw new Error("Os números devem estar entre 1 e 60.");
+    throw new Error("Os números da aposta devem estar entre 1 e 60.");
   }
 
   const set = new Set(numeros);
   if (set.size !== numeros.length) {
-    throw new Error("Não é permitido repetir números.");
+    throw new Error("Não é permitido repetir números na mesma aposta.");
   }
 
-  if (qtdEsperada && numeros.length !== qtdEsperada) {
-    throw new Error(`Você deve informar exatamente ${qtdEsperada} números.`);
-  }
-
-  // retorna ordenados
+  // ordena antes de salvar
   return numeros.sort((a, b) => a - b);
 }
 
+// SORTEIO: exige exatamente 6 números preenchidos
+function obterNumerosSorteio() {
+  const valores = sorteioInputs.map((input) => input.value.trim());
+
+  if (valores.some((v) => v === "")) {
+    throw new Error("Preencha todos os 6 números do sorteio.");
+  }
+
+  const numeros = valores.map((v) => Number(v));
+
+  if (numeros.some((n) => Number.isNaN(n))) {
+    throw new Error("Todos os campos do sorteio devem conter números.");
+  }
+
+  if (numeros.some((n) => n < 1 || n > 60)) {
+    throw new Error("Os números do sorteio devem estar entre 1 e 60.");
+  }
+
+  const set = new Set(numeros);
+  if (set.size !== numeros.length) {
+    throw new Error("Não é permitido repetir números no sorteio.");
+  }
+
+  if (numeros.length !== 6) {
+    throw new Error("Você deve informar exatamente 6 números no sorteio.");
+  }
+
+  return numeros.sort((a, b) => a - b);
+}
+
+// ---------- LISTA DE APOSTAS ----------
 function atualizarListaApostas() {
   listaApostasEl.innerHTML = "";
 
@@ -70,7 +154,7 @@ function atualizarListaApostas() {
 
   totalApostasEl.textContent = String(apostas.length);
 
-  // encontrar maior número de acertos para destacar
+  // maior número de acertos (para destacar)
   const maioresAcertos = apostas.reduce((max, a) => {
     if (typeof a.acertos !== "number") return max;
     return a.acertos > max ? a.acertos : max;
@@ -152,6 +236,7 @@ function editarAposta(id) {
   const aposta = apostas.find((a) => a.id === id);
   if (!aposta) return;
   nomeInput.value = aposta.nome;
+  apostaInputs.forEach((input) => (input.value = ""));
   aposta.numeros.forEach((n, idx) => {
     if (apostaInputs[idx]) {
       apostaInputs[idx].value = n;
@@ -159,16 +244,19 @@ function editarAposta(id) {
   });
   // remove para ser regravada depois
   apostas = apostas.filter((a) => a.id !== id);
-  atualizarListaApostas();
-}
-
-function excluirAposta(id) {
-  apostas = apostas.filter((a) => a.id !== id);
+  salvarApostas();
   atualizarListaApostas();
   atualizarResultadoResumo();
 }
 
-// Resultado / resumo
+function excluirAposta(id) {
+  apostas = apostas.filter((a) => a.id !== id);
+  salvarApostas();
+  atualizarListaApostas();
+  atualizarResultadoResumo();
+}
+
+// ---------- RESULTADO / RESUMO ----------
 function atualizarResultadoResumo() {
   resultadoEl.innerHTML = "";
 
@@ -180,7 +268,6 @@ function atualizarResultadoResumo() {
     return;
   }
 
-  // filtra apostas que já têm acertos calculados
   const calculadas = apostas.filter((a) => typeof a.acertos === "number");
 
   if (calculadas.length === 0) {
@@ -191,9 +278,14 @@ function atualizarResultadoResumo() {
     return;
   }
 
-  const maior = calculadas.reduce((max, a) => (a.acertos > max ? a.acertos : max), 0);
+  const maior = calculadas.reduce(
+    (max, a) => (a.acertos > max ? a.acertos : max),
+    0
+  );
 
-  const melhores = calculadas.filter((a) => a.acertos === maior && maior > 0);
+  const melhores = calculadas.filter(
+    (a) => a.acertos === maior && maior > 0
+  );
 
   const tituloMelhores = document.createElement("div");
   tituloMelhores.className = "result-title";
@@ -233,7 +325,6 @@ function atualizarResultadoResumo() {
   tituloResumo.textContent = "Resumo";
   resultadoEl.appendChild(tituloResumo);
 
-  // contagem por número de acertos
   const mapa = new Map();
   calculadas.forEach((a) => {
     const k = a.acertos;
@@ -244,7 +335,9 @@ function atualizarResultadoResumo() {
   Array.from(mapa.entries())
     .sort((a, b) => b[0] - a[0])
     .forEach(([acertos, qtd]) => {
-      resumo.push(`${qtd} aposta${qtd > 1 ? "s" : ""} com ${acertos} acerto${acertos > 1 ? "s" : ""}`);
+      resumo.push(
+        `${qtd} aposta${qtd > 1 ? "s" : ""} com ${acertos} acerto${acertos > 1 ? "s" : ""}`
+      );
     });
 
   const resumoEl = document.createElement("div");
@@ -253,7 +346,7 @@ function atualizarResultadoResumo() {
   resultadoEl.appendChild(resumoEl);
 }
 
-// Eventos
+// ---------- EVENTOS ----------
 btnAdicionar.addEventListener("click", () => {
   limparMensagemErro();
   try {
@@ -262,7 +355,7 @@ btnAdicionar.addEventListener("click", () => {
       throw new Error("Informe o nome do participante.");
     }
 
-    const numeros = obterNumerosValidos(apostaInputs, 7);
+    const numeros = obterNumerosAposta();
 
     const novaAposta = {
       id: Date.now() + Math.random().toString(16).slice(2),
@@ -272,6 +365,7 @@ btnAdicionar.addEventListener("click", () => {
     };
 
     apostas.push(novaAposta);
+    salvarApostas();
     limparCamposAposta();
     atualizarListaApostas();
     atualizarResultadoResumo();
@@ -287,7 +381,7 @@ btnLimpar.addEventListener("click", () => {
 btnCalcular.addEventListener("click", () => {
   limparMensagemErro();
   try {
-    const numerosSorteio = obterNumerosValidos(sorteioInputs, 6);
+    const numerosSorteio = obterNumerosSorteio();
     const setSorteio = new Set(numerosSorteio);
 
     apostas = apostas.map((a) => {
@@ -295,6 +389,7 @@ btnCalcular.addEventListener("click", () => {
       return { ...a, acertos };
     });
 
+    salvarApostas();
     atualizarListaApostas();
     atualizarResultadoResumo();
   } catch (err) {
@@ -302,6 +397,7 @@ btnCalcular.addEventListener("click", () => {
   }
 });
 
-// inicial
+// ---------- INICIALIZAÇÃO ----------
+carregarApostas();
 atualizarListaApostas();
 atualizarResultadoResumo();
