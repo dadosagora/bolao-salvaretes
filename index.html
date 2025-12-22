@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Bolão Salvaretes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="app-inner">
+      <!-- Cabeçalho -->
+      <header class="header">
+        <div class="logo-circle">BS</div>
+        <div class="header-text">
+          <div class="header-title">
+            Bolão Salvaretes
+            <span class="small">Mega da Virada</span>
+          </div>
+          <div class="header-subtitle">
+            Cadastre as apostas da família e veja quem acertou mais números.
+          </div>
+        </div>
+      </header>
+
+      <!-- Chips informativos -->
+      <div class="chips">
+        <div class="chip chip-primary">🎫 7 números por aposta</div>
+        <div class="chip">🎯 6 números sorteados</div>
+        <div class="chip">👨‍👩‍👧‍👦 Salvaretes only</div>
+      </div>
+
+      <!-- Card de cadastro -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <span class="icon">➕</span> Cadastrar aposta
+            </div>
+            <div class="card-subtitle">
+              Informe o nome e os 7 números da aposta.
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span class="dot"></span> Nome do participante
+          </div>
+          <input id="nome-participante" class="input-text" type="text" placeholder="Ex.: Matheus, Tati, Vó Maria" />
+        </div>
+
+        <div class="field">
+          <div class="field-label">
+            <span class="dot"></span> Números da aposta (7 números de 1 a 60)
+          </div>
+          <div class="numbers-row" id="aposta-numeros">
+            <input class="num-input aposta-num" type="number" min="1" max="60" placeholder="01" />
+            <input class="num-input aposta-num" type="number" min="1" max="60" placeholder="02" />
+            <input class="num-input aposta-num" type="number" min="1" max="60" placeholder="03" />
+            <input class="num-input aposta-num" type="number" min="1" max="60" placeholder="04" />
+            <input class="num-input aposta-num" type="number" min="1" max="60" placeholder="05" />
+            <input class="num-input aposta-num" type="number" min="1" max="60" placeholder="06" />
+            <input class="num-input aposta-num" type="number" min="1" max="60" placeholder="07" />
+          </div>
+          <div class="hint">Sem números repetidos na mesma aposta.</div>
+        </div>
+
+        <button id="btn-adicionar" class="btn-primary">
+          <span>📥</span> adicionar aposta
+        </button>
+        <button id="btn-limpar" class="btn-secondary">
+          limpar campos
+        </button>
+
+        <p class="hint" id="mensagem-erro"></p>
+      </div>
+
+      <div class="cards-row">
+        <!-- Apostas cadastradas -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span class="icon">📋</span> Apostas cadastradas
+              </div>
+              <div class="card-subtitle">
+                Todas as apostas do bolão em uma lista só.
+              </div>
+            </div>
+            <span class="badge-count"><span id="total-apostas">0</span> apostas</span>
+          </div>
+
+          <div class="bets-list" id="lista-apostas">
+            <p class="hint">Nenhuma aposta cadastrada ainda.</p>
+          </div>
+        </div>
+
+        <!-- Sorteio + Resultado -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span class="icon">🎰</span> Números sorteados
+              </div>
+              <div class="card-subtitle">
+                Digite os 6 números da Mega da Virada.
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span class="dot"></span> Números do sorteio
+            </div>
+            <div class="numbers-row numbers-row-6" id="sorteio-numeros">
+              <input class="num-input sorteio-num" type="number" min="1" max="60" placeholder="01" />
+              <input class="num-input sorteio-num" type="number" min="1" max="60" placeholder="02" />
+              <input class="num-input sorteio-num" type="number" min="1" max="60" placeholder="03" />
+              <input class="num-input sorteio-num" type="number" min="1" max="60" placeholder="04" />
+              <input class="num-input sorteio-num" type="number" min="1" max="60" placeholder="05" />
+              <input class="num-input sorteio-num" type="number" min="1" max="60" placeholder="06" />
+            </div>
+            <div class="hint">Depois é só calcular que o app marca quem acertou mais.</div>
+          </div>
+
+          <button id="btn-calcular" class="btn-primary btn-calc">
+            <span>✨</span> calcular acertos
+          </button>
+
+          <div class="divider"></div>
+
+          <div class="result-block" id="resultado">
+            <div class="hint">O resultado aparecerá aqui depois do cálculo.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
