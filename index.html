@@ -23,14 +23,14 @@
         </div>
       </header>
 
-      <!-- Chips informativos -->
+      <!-- Chips -->
       <div class="chips">
         <div class="chip chip-primary">🎫 6 ou 7 números por aposta</div>
         <div class="chip">🎯 6 números sorteados</div>
         <div class="chip">👨‍👩‍👧‍👦 Salvaretes only</div>
       </div>
 
-      <!-- Card de cadastro -->
+      <!-- Cadastro -->
       <div class="card">
         <div class="card-header">
           <div>
@@ -77,6 +77,7 @@
       </div>
 
       <div class="cards-row">
+
         <!-- Apostas cadastradas -->
         <div class="card">
           <div class="card-header">
@@ -96,7 +97,26 @@
           </div>
         </div>
 
-        <!-- Sorteio + Resultado -->
+        <!-- Frequência -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span class="icon">📊</span> Números mais jogados
+              </div>
+              <div class="card-subtitle">
+                Quantas vezes cada número apareceu nas apostas.
+              </div>
+            </div>
+            <span class="badge-count" id="total-numeros-usados">0 nºs</span>
+          </div>
+
+          <div class="freq-list" id="lista-frequencia">
+            <p class="hint">Os números mais jogados vão aparecer aqui depois que você cadastrar as apostas.</p>
+          </div>
+        </div>
+
+        <!-- Sorteio -->
         <div class="card">
           <div class="card-header">
             <div>
@@ -133,25 +153,6 @@
           <div class="result-block" id="resultado">
             <div class="hint">O resultado aparecerá aqui depois do cálculo.</div>
           </div>
-        </div>
-      </div>
-
-      <!-- Frequência de números -->
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">
-              <span class="icon">📊</span> Números mais jogados
-            </div>
-            <div class="card-subtitle">
-              Quantas vezes cada número apareceu nas apostas.
-            </div>
-          </div>
-          <span class="badge-count" id="total-numeros-usados">0 nºs</span>
-        </div>
-
-        <div class="freq-list" id="lista-frequencia">
-          <p class="hint">Os números mais jogados vão aparecer aqui depois que você cadastrar as apostas.</p>
         </div>
       </div>
 
