@@ -280,7 +280,7 @@ body {
 }
 
 .bets-list {
-  /* deixa crescer livremente, sem scroll interno */
+  /* sem scroll interno: deixa crescer para aparecer tudo na tela */
   max-height: none;
   overflow-y: visible;
   padding-right: 0;
@@ -422,6 +422,35 @@ body {
   background: radial-gradient(circle, rgba(148,163,184,0.7), transparent);
   margin: 6px 0;
   opacity: 0.6;
+}
+
+/* Frequência de números */
+.freq-list {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.freq-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.5);
+  background: rgba(15,23,42,0.98);
+  font-size: 11px;
+  color: #e5e7eb;
+}
+
+.freq-item-num {
+  font-weight: 600;
+}
+
+.freq-item-count {
+  font-size: 10px;
+  color: var(--muted);
 }
 
 @media (min-width: 480px) {
