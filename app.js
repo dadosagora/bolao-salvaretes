@@ -5,6 +5,7 @@
 // - Card de "Números mais jogados"
 // - Botão para limpar sorteio
 // - Botão para gerar PDF (imprimir apostas)
+// - Resumo dos números sorteados (tela + PDF)
 
 const nomeInput = document.getElementById("nome-participante");
 const apostaInputs = Array.from(document.querySelectorAll(".aposta-num"));
@@ -24,6 +25,7 @@ const mensagemErroEl = document.getElementById("mensagem-erro");
 const STORAGE_KEY = "bolaoSalvaretes_v1";
 
 let apostas = []; // { id, nome, numeros: [..], acertos: null }
+let numerosSorteioAtual = null; // [n1..n6] ou null
 
 // ---------- UTILITÁRIOS DE ERRO ----------
 function limparMensagemErro() {
@@ -252,6 +254,25 @@ function editarAposta(id) {
   atualizarFrequenciaNumeros();
 }
 
+// ---------- RESUMO SORTEIO (tela + PDF) ----------
+function atualizarResumoSorteioPrint() {
+  const resumoEl = document.getElementById("resumo-sorteio-print");
+  if (!resumoEl) return;
+
+  if (
+    !numerosSorteioAtual ||
+    !Array.isArray(numerosSorteioAtual) ||
+    numerosSorteioAtual.length !== 6
+  ) {
+    resumoEl.textContent = "Números sorteados: Carol ainda não inseriu.";
+  } else {
+    const nums = numerosSorteioAtual
+      .map((n) => String(n).padStart(2, "0"))
+      .join(" · ");
+    resumoEl.textContent = `Números sorteados: ${nums}`;
+  }
+}
+
 function excluirAposta(id) {
   apostas = apostas.filter((a) => a.id !== id);
   salvarApostas();
@@ -408,10 +429,12 @@ function atualizarFrequenciaNumeros() {
 // ---------- LIMPAR SORTEIO ----------
 function limparSorteioCamposEAcertos() {
   sorteioInputs.forEach((i) => (i.value = ""));
+  numerosSorteioAtual = null;
   apostas = apostas.map((a) => ({ ...a, acertos: null }));
   salvarApostas();
   atualizarListaApostas();
   atualizarResultadoResumo();
+  atualizarResumoSorteioPrint();
 }
 
 // ---------- EVENTOS ----------
@@ -453,6 +476,9 @@ btnCalcular.addEventListener("click", () => {
     const numerosSorteio = obterNumerosSorteio();
     const setSorteio = new Set(numerosSorteio);
 
+    numerosSorteioAtual = numerosSorteio;
+    atualizarResumoSorteioPrint();
+
     apostas = apostas.map((a) => {
       const acertos = a.numeros.filter((n) => setSorteio.has(n)).length;
       return { ...a, acertos };
@@ -475,8 +501,7 @@ if (btnLimparSorteio) {
 
 if (btnImprimir) {
   btnImprimir.addEventListener("click", () => {
-    // abre a tela de impressão; no navegador você escolhe "Salvar como PDF"
-    window.print();
+    window.print(); // você escolhe "Salvar como PDF"
   });
 }
 
@@ -485,3 +510,4 @@ carregarApostas();
 atualizarListaApostas();
 atualizarResultadoResumo();
 atualizarFrequenciaNumeros();
+atualizarResumoSorteioPrint();
