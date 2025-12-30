@@ -1,11 +1,8 @@
-// Lógica principal do Bolão Salvaretes
-// - Apostas com 6 ou 7 números (mínimo 6, sem repetir)
-// - Auto-avance ao digitar 2 dígitos
-// - Salva tudo em localStorage
-// - Card de "Números mais jogados"
-// - Botão para limpar sorteio
-// - Botão para gerar PDF (imprimir apostas)
-// - Resumo dos números sorteados (tela + PDF)
+// Lógica principal do Bolão Salvaretes + outros bolões
+// - Apostas Salvaretes (6 ou 7 números, mínimo 6, sem repetir)
+// - Números sorteados + acertos + PDF
+// - Números mais jogados
+// - Meus outros bolões (nome + números) independentes, só na tela
 
 const nomeInput = document.getElementById("nome-participante");
 const apostaInputs = Array.from(document.querySelectorAll(".aposta-num"));
@@ -21,19 +18,32 @@ const listaApostasEl = document.getElementById("lista-apostas");
 const totalApostasEl = document.getElementById("total-apostas");
 const resultadoEl = document.getElementById("resultado");
 const mensagemErroEl = document.getElementById("mensagem-erro");
+const resumoSorteioEl = document.getElementById("resumo-sorteio-print");
+
+// Outros bolões
+const outroNomeInput = document.getElementById("outro-nome-bolao");
+const outroNumInputs = Array.from(document.querySelectorAll(".outro-num"));
+const btnSalvarOutroBolao = document.getElementById("btn-salvar-outro-bolao");
+const listaOutrosBoloesEl = document.getElementById("lista-outros-boloes");
+const btnAddOutroBolaoTop = document.getElementById("btn-add-outro-bolao");
 
 const STORAGE_KEY = "bolaoSalvaretes_v1";
+const OUTROS_STORAGE_KEY = "bolaoSalvaretes_outros_v1";
 
-let apostas = []; // { id, nome, numeros: [..], acertos: null }
+let apostas = []; // Salvaretes: { id, nome, numeros: [..], acertos: null }
 let numerosSorteioAtual = null; // [n1..n6] ou null
+
+let outrosBoloes = []; // { id, nome, numeros }
 
 // ---------- UTILITÁRIOS DE ERRO ----------
 function limparMensagemErro() {
+  if (!mensagemErroEl) return;
   mensagemErroEl.textContent = "";
   mensagemErroEl.style.color = "var(--muted)";
 }
 
 function mostrarErro(msg) {
+  if (!mensagemErroEl) return;
   mensagemErroEl.textContent = msg;
   mensagemErroEl.style.color = "#f87171";
 }
@@ -61,13 +71,14 @@ function setupAutoAdvance(inputs) {
 
 setupAutoAdvance(apostaInputs);
 setupAutoAdvance(sorteioInputs);
+setupAutoAdvance(outroNumInputs);
 
-// ---------- LOCALSTORAGE ----------
+// ---------- LOCALSTORAGE Salvaretes ----------
 function salvarApostas() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(apostas));
   } catch (e) {
-    console.warn("Não foi possível salvar no localStorage:", e);
+    console.warn("Não foi possível salvar no localStorage (apostas):", e);
   }
 }
 
@@ -80,13 +91,35 @@ function carregarApostas() {
       apostas = dados;
     }
   } catch (e) {
-    console.warn("Não foi possível carregar do localStorage:", e);
+    console.warn("Não foi possível carregar do localStorage (apostas):", e);
+  }
+}
+
+// ---------- LOCALSTORAGE Outros bolões ----------
+function salvarOutrosBoloes() {
+  try {
+    localStorage.setItem(OUTROS_STORAGE_KEY, JSON.stringify(outrosBoloes));
+  } catch (e) {
+    console.warn("Não foi possível salvar no localStorage (outros bolões):", e);
+  }
+}
+
+function carregarOutrosBoloes() {
+  try {
+    const salvo = localStorage.getItem(OUTROS_STORAGE_KEY);
+    if (!salvo) return;
+    const dados = JSON.parse(salvo);
+    if (Array.isArray(dados)) {
+      outrosBoloes = dados;
+    }
+  } catch (e) {
+    console.warn("Não foi possível carregar do localStorage (outros bolões):", e);
   }
 }
 
 // ---------- VALIDAÇÃO DOS NÚMEROS ----------
 
-// APOSTA: aceita 6 ou 7 números, sem repetir
+// APOSTA Salvaretes: aceita 6 ou 7 números, sem repetir
 function obterNumerosAposta() {
   const valores = apostaInputs
     .map((input) => input.value.trim())
@@ -109,6 +142,34 @@ function obterNumerosAposta() {
   const set = new Set(numeros);
   if (set.size !== numeros.length) {
     throw new Error("Não é permitido repetir números na mesma aposta.");
+  }
+
+  return numeros.sort((a, b) => a - b);
+}
+
+// OUTRO bolão: também 6 ou 7 números, sem repetir
+function obterNumerosOutroBolao() {
+  const valores = outroNumInputs
+    .map((input) => input.value.trim())
+    .filter((v) => v !== "");
+
+  if (valores.length < 6) {
+    throw new Error("Informe pelo menos 6 números para o bolão.");
+  }
+
+  const numeros = valores.map((v) => Number(v));
+
+  if (numeros.some((n) => Number.isNaN(n))) {
+    throw new Error("Todos os campos de números do bolão devem conter números.");
+  }
+
+  if (numeros.some((n) => n < 1 || n > 60)) {
+    throw new Error("Os números do bolão devem estar entre 1 e 60.");
+  }
+
+  const set = new Set(numeros);
+  if (set.size !== numeros.length) {
+    throw new Error("Não é permitido repetir números no mesmo bolão.");
   }
 
   return numeros.sort((a, b) => a - b);
@@ -144,8 +205,10 @@ function obterNumerosSorteio() {
   return numeros.sort((a, b) => a - b);
 }
 
-// ---------- LISTA DE APOSTAS ----------
+// ---------- LISTA DE APOSTAS Salvaretes ----------
 function atualizarListaApostas() {
+  if (!listaApostasEl || !totalApostasEl) return;
+
   listaApostasEl.innerHTML = "";
 
   if (apostas.length === 0) {
@@ -159,7 +222,6 @@ function atualizarListaApostas() {
 
   totalApostasEl.textContent = String(apostas.length);
 
-  // maior número de acertos (para destacar)
   const maioresAcertos = apostas.reduce((max, a) => {
     if (typeof a.acertos !== "number") return max;
     return a.acertos > max ? a.acertos : max;
@@ -232,7 +294,7 @@ function atualizarListaApostas() {
 }
 
 function limparCamposAposta() {
-  nomeInput.value = "";
+  if (nomeInput) nomeInput.value = "";
   apostaInputs.forEach((input) => (input.value = ""));
   limparMensagemErro();
 }
@@ -240,7 +302,7 @@ function limparCamposAposta() {
 function editarAposta(id) {
   const aposta = apostas.find((a) => a.id === id);
   if (!aposta) return;
-  nomeInput.value = aposta.nome;
+  if (nomeInput) nomeInput.value = aposta.nome;
   apostaInputs.forEach((input) => (input.value = ""));
   aposta.numeros.forEach((n, idx) => {
     if (apostaInputs[idx]) {
@@ -254,25 +316,6 @@ function editarAposta(id) {
   atualizarFrequenciaNumeros();
 }
 
-// ---------- RESUMO SORTEIO (tela + PDF) ----------
-function atualizarResumoSorteioPrint() {
-  const resumoEl = document.getElementById("resumo-sorteio-print");
-  if (!resumoEl) return;
-
-  if (
-    !numerosSorteioAtual ||
-    !Array.isArray(numerosSorteioAtual) ||
-    numerosSorteioAtual.length !== 6
-  ) {
-    resumoEl.textContent = "Números sorteados: Carol ainda não inseriu.";
-  } else {
-    const nums = numerosSorteioAtual
-      .map((n) => String(n).padStart(2, "0"))
-      .join(" · ");
-    resumoEl.textContent = `Números sorteados: ${nums}`;
-  }
-}
-
 function excluirAposta(id) {
   apostas = apostas.filter((a) => a.id !== id);
   salvarApostas();
@@ -281,8 +324,27 @@ function excluirAposta(id) {
   atualizarFrequenciaNumeros();
 }
 
-// ---------- RESULTADO / RESUMO ----------
+// ---------- RESUMO SORTEIO (tela + PDF) ----------
+function atualizarResumoSorteioPrint() {
+  if (!resumoSorteioEl) return;
+
+  if (
+    !numerosSorteioAtual ||
+    !Array.isArray(numerosSorteioAtual) ||
+    numerosSorteioAtual.length !== 6
+  ) {
+    resumoSorteioEl.textContent = "Números sorteados: Carol ainda não inseriu.";
+  } else {
+    const nums = numerosSorteioAtual
+      .map((n) => String(n).padStart(2, "0"))
+      .join(" · ");
+    resumoSorteioEl.textContent = `Números sorteados: ${nums}`;
+  }
+}
+
+// ---------- RESULTADO / RESUMO Salvaretes ----------
 function atualizarResultadoResumo() {
+  if (!resultadoEl) return;
   resultadoEl.innerHTML = "";
 
   if (apostas.length === 0) {
@@ -371,7 +433,7 @@ function atualizarResultadoResumo() {
   resultadoEl.appendChild(resumoEl);
 }
 
-// ---------- FREQUÊNCIA DE NÚMEROS ----------
+// ---------- FREQUÊNCIA DE NÚMEROS Salvaretes ----------
 function atualizarFrequenciaNumeros() {
   const lista = document.getElementById("lista-frequencia");
   const totalSpan = document.getElementById("total-numeros-usados");
@@ -426,6 +488,69 @@ function atualizarFrequenciaNumeros() {
   });
 }
 
+// ---------- LISTA Meus outros bolões ----------
+function limparCamposOutroBolao() {
+  if (outroNomeInput) outroNomeInput.value = "";
+  outroNumInputs.forEach((i) => (i.value = ""));
+}
+
+function atualizarListaOutrosBoloes() {
+  if (!listaOutrosBoloesEl) return;
+
+  listaOutrosBoloesEl.innerHTML = "";
+
+  if (outrosBoloes.length === 0) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "Nenhum outro bolão cadastrado ainda.";
+    listaOutrosBoloesEl.appendChild(p);
+    return;
+  }
+
+  outrosBoloes.forEach((bolao) => {
+    const item = document.createElement("div");
+    item.className = "outros-item";
+
+    const header = document.createElement("div");
+    header.className = "outros-header";
+
+    const nomeSpan = document.createElement("div");
+    nomeSpan.className = "outros-nome";
+    nomeSpan.textContent = bolao.nome;
+
+    header.appendChild(nomeSpan);
+
+    const numerosDiv = document.createElement("div");
+    numerosDiv.className = "outros-numeros";
+    bolao.numeros.forEach((n) => {
+      const chip = document.createElement("span");
+      chip.className = "chip-number";
+      chip.textContent = String(n).padStart(2, "0");
+      numerosDiv.appendChild(chip);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "outros-actions";
+
+    const excluirBtn = document.createElement("button");
+    excluirBtn.className = "bet-btn danger";
+    excluirBtn.textContent = "excluir";
+    excluirBtn.addEventListener("click", () => {
+      outrosBoloes = outrosBoloes.filter((b) => b.id !== bolao.id);
+      salvarOutrosBoloes();
+      atualizarListaOutrosBoloes();
+    });
+
+    actions.appendChild(excluirBtn);
+
+    item.appendChild(header);
+    item.appendChild(numerosDiv);
+    item.appendChild(actions);
+
+    listaOutrosBoloesEl.appendChild(item);
+  });
+}
+
 // ---------- LIMPAR SORTEIO ----------
 function limparSorteioCamposEAcertos() {
   sorteioInputs.forEach((i) => (i.value = ""));
@@ -437,60 +562,66 @@ function limparSorteioCamposEAcertos() {
   atualizarResumoSorteioPrint();
 }
 
-// ---------- EVENTOS ----------
-btnAdicionar.addEventListener("click", () => {
-  limparMensagemErro();
-  try {
-    const nome = nomeInput.value.trim();
-    if (!nome) {
-      throw new Error("Informe o nome do participante.");
+// ---------- EVENTOS Salvaretes ----------
+if (btnAdicionar) {
+  btnAdicionar.addEventListener("click", () => {
+    limparMensagemErro();
+    try {
+      const nome = nomeInput ? nomeInput.value.trim() : "";
+      if (!nome) {
+        throw new Error("Informe o nome do participante.");
+      }
+
+      const numeros = obterNumerosAposta();
+
+      const novaAposta = {
+        id: Date.now() + Math.random().toString(16).slice(2),
+        nome,
+        numeros,
+        acertos: null,
+      };
+
+      apostas.push(novaAposta);
+      salvarApostas();
+      limparCamposAposta();
+      atualizarListaApostas();
+      atualizarResultadoResumo();
+      atualizarFrequenciaNumeros();
+    } catch (err) {
+      mostrarErro(err.message);
     }
+  });
+}
 
-    const numeros = obterNumerosAposta();
-
-    const novaAposta = {
-      id: Date.now() + Math.random().toString(16).slice(2),
-      nome,
-      numeros,
-      acertos: null,
-    };
-
-    apostas.push(novaAposta);
-    salvarApostas();
+if (btnLimpar) {
+  btnLimpar.addEventListener("click", () => {
     limparCamposAposta();
-    atualizarListaApostas();
-    atualizarResultadoResumo();
-    atualizarFrequenciaNumeros();
-  } catch (err) {
-    mostrarErro(err.message);
-  }
-});
+  });
+}
 
-btnLimpar.addEventListener("click", () => {
-  limparCamposAposta();
-});
+if (btnCalcular) {
+  btnCalcular.addEventListener("click", () => {
+    limparMensagemErro();
+    try {
+      const numerosSorteio = obterNumerosSorteio();
+      const setSorteio = new Set(numerosSorteio);
 
-btnCalcular.addEventListener("click", () => {
-  limparMensagemErro();
-  try {
-    const numerosSorteio = obterNumerosSorteio();
-    const setSorteio = new Set(numerosSorteio);
+      numerosSorteioAtual = numerosSorteio;
+      atualizarResumoSorteioPrint();
 
-    numerosSorteioAtual = numerosSorteio;
-    atualizarResumoSorteioPrint();
+      apostas = apostas.map((a) => {
+        const acertos = a.numeros.filter((n) => setSorteio.has(n)).length;
+        return { ...a, acertos };
+      });
 
-    apostas = apostas.map((a) => {
-      const acertos = a.numeros.filter((n) => setSorteio.has(n)).length;
-      return { ...a, acertos };
-    });
-
-    salvarApostas();
-    atualizarListaApostas();
-    atualizarResultadoResumo();
-  } catch (err) {
-    mostrarErro(err.message);
-  }
-});
+      salvarApostas();
+      atualizarListaApostas();
+      atualizarResultadoResumo();
+    } catch (err) {
+      mostrarErro(err.message);
+    }
+  });
+}
 
 if (btnLimparSorteio) {
   btnLimparSorteio.addEventListener("click", () => {
@@ -505,9 +636,50 @@ if (btnImprimir) {
   });
 }
 
+// ---------- EVENTOS Meus outros bolões ----------
+if (btnSalvarOutroBolao) {
+  btnSalvarOutroBolao.addEventListener("click", () => {
+    limparMensagemErro();
+    try {
+      const nome = outroNomeInput ? outroNomeInput.value.trim() : "";
+      if (!nome) {
+        throw new Error("Informe o nome do bolão.");
+      }
+
+      const numeros = obterNumerosOutroBolao();
+
+      const novo = {
+        id: Date.now() + Math.random().toString(16).slice(2),
+        nome,
+        numeros,
+      };
+
+      outrosBoloes.push(novo);
+      salvarOutrosBoloes();
+      limparCamposOutroBolao();
+      atualizarListaOutrosBoloes();
+    } catch (err) {
+      mostrarErro(err.message);
+    }
+  });
+}
+
+// Botão "+" no topo: só dá foco no card dos outros bolões
+if (btnAddOutroBolaoTop && outroNomeInput) {
+  btnAddOutroBolaoTop.addEventListener("click", () => {
+    outroNomeInput.scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => {
+      outroNomeInput.focus();
+    }, 300);
+  });
+}
+
 // ---------- INICIALIZAÇÃO ----------
 carregarApostas();
+carregarOutrosBoloes();
+
 atualizarListaApostas();
 atualizarResultadoResumo();
 atualizarFrequenciaNumeros();
 atualizarResumoSorteioPrint();
+atualizarListaOutrosBoloes();
