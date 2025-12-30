@@ -3,6 +3,8 @@
 // - Auto-avance ao digitar 2 dígitos
 // - Salva tudo em localStorage
 // - Card de "Números mais jogados"
+// - Botão para limpar sorteio
+// - Botão para gerar PDF (imprimir apostas)
 
 const nomeInput = document.getElementById("nome-participante");
 const apostaInputs = Array.from(document.querySelectorAll(".aposta-num"));
@@ -11,6 +13,8 @@ const sorteioInputs = Array.from(document.querySelectorAll(".sorteio-num"));
 const btnAdicionar = document.getElementById("btn-adicionar");
 const btnLimpar = document.getElementById("btn-limpar");
 const btnCalcular = document.getElementById("btn-calcular");
+const btnLimparSorteio = document.getElementById("btn-limpar-sorteio");
+const btnImprimir = document.getElementById("btn-imprimir");
 
 const listaApostasEl = document.getElementById("lista-apostas");
 const totalApostasEl = document.getElementById("total-apostas");
@@ -29,7 +33,7 @@ function limparMensagemErro() {
 
 function mostrarErro(msg) {
   mensagemErroEl.textContent = msg;
-  mensagemErroEl.style.color = "#fecaca";
+  mensagemErroEl.style.color = "#f87171";
 }
 
 // ---------- AUTO-AVANÇAR CAMPOS (2 DÍGITOS) ----------
@@ -241,7 +245,6 @@ function editarAposta(id) {
       apostaInputs[idx].value = n;
     }
   });
-  // remove para ser regravada depois
   apostas = apostas.filter((a) => a.id !== id);
   salvarApostas();
   atualizarListaApostas();
@@ -377,11 +380,11 @@ function atualizarFrequenciaNumeros() {
   totalSpan.textContent = `${totalNumeros} nºs`;
 
   const ordenados = Array.from(freq.entries()).sort((a, b) => {
-    if (b[1] !== a[1]) return b[1] - a[1]; // mais frequente primeiro
-    return a[0] - b[0]; // em empate, menor número primeiro
+    if (b[1] !== a[1]) return b[1] - a[1];
+    return a[0] - b[0];
   });
 
-  const top = ordenados.slice(0, 15); // mostra até 15 nºs
+  const top = ordenados.slice(0, 15);
 
   top.forEach(([numero, qtd]) => {
     const item = document.createElement("div");
@@ -400,6 +403,15 @@ function atualizarFrequenciaNumeros() {
 
     lista.appendChild(item);
   });
+}
+
+// ---------- LIMPAR SORTEIO ----------
+function limparSorteioCamposEAcertos() {
+  sorteioInputs.forEach((i) => (i.value = ""));
+  apostas = apostas.map((a) => ({ ...a, acertos: null }));
+  salvarApostas();
+  atualizarListaApostas();
+  atualizarResultadoResumo();
 }
 
 // ---------- EVENTOS ----------
@@ -449,11 +461,24 @@ btnCalcular.addEventListener("click", () => {
     salvarApostas();
     atualizarListaApostas();
     atualizarResultadoResumo();
-    // frequência não muda aqui
   } catch (err) {
     mostrarErro(err.message);
   }
 });
+
+if (btnLimparSorteio) {
+  btnLimparSorteio.addEventListener("click", () => {
+    limparMensagemErro();
+    limparSorteioCamposEAcertos();
+  });
+}
+
+if (btnImprimir) {
+  btnImprimir.addEventListener("click", () => {
+    // abre a tela de impressão; no navegador você escolhe "Salvar como PDF"
+    window.print();
+  });
+}
 
 // ---------- INICIALIZAÇÃO ----------
 carregarApostas();
