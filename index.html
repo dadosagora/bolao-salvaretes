@@ -10,7 +10,7 @@
   <div class="app">
     <div class="app-inner">
       <!-- Cabeçalho -->
-      <header class="header">
+      <header class="header no-print">
         <div class="logo-circle">BS</div>
         <div class="header-text">
           <div class="header-title">
@@ -24,14 +24,14 @@
       </header>
 
       <!-- Chips -->
-      <div class="chips">
+      <div class="chips no-print">
         <div class="chip chip-primary">🎫 6 ou 7 números por aposta</div>
         <div class="chip">🎯 6 números sorteados</div>
         <div class="chip">👨‍👩‍👧‍👦 Salvaretes only</div>
       </div>
 
       <!-- Cadastro -->
-      <div class="card">
+      <div class="card no-print">
         <div class="card-header">
           <div>
             <div class="card-title">
@@ -77,9 +77,8 @@
       </div>
 
       <div class="cards-row">
-
         <!-- Apostas cadastradas -->
-        <div class="card">
+        <div class="card" id="card-apostas">
           <div class="card-header">
             <div>
               <div class="card-title">
@@ -95,10 +94,15 @@
           <div class="bets-list" id="lista-apostas">
             <p class="hint">Nenhuma aposta cadastrada ainda.</p>
           </div>
+
+          <!-- Botão para gerar PDF (impressão) -->
+          <button id="btn-imprimir" class="btn-secondary no-print" style="margin-top:8px;">
+            Gerar PDF das apostas
+          </button>
         </div>
 
         <!-- Frequência -->
-        <div class="card">
+        <div class="card no-print">
           <div class="card-header">
             <div>
               <div class="card-title">
@@ -117,7 +121,7 @@
         </div>
 
         <!-- Sorteio -->
-        <div class="card">
+        <div class="card no-print">
           <div class="card-header">
             <div>
               <div class="card-title">
@@ -146,6 +150,9 @@
 
           <button id="btn-calcular" class="btn-primary btn-calc">
             <span>✨</span> calcular acertos
+          </button>
+          <button id="btn-limpar-sorteio" class="btn-secondary" style="margin-top:6px;">
+            limpar sorteio
           </button>
 
           <div class="divider"></div>
