@@ -361,6 +361,15 @@ body {
   color: var(--muted);
 }
 
+/*** Resumo dos números sorteados ***/
+.sorteio-resumo {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed #e5e7eb;
+  font-size: 11px;
+  color: var(--muted);
+}
+
 /*** Layout responsivo ***/
 @media (min-width: 480px) {
   .cards-row {
