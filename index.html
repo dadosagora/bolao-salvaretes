@@ -9,8 +9,8 @@
 <body>
   <div class="app">
     <div class="app-inner">
-      <!-- Cabeçalho -->
-      <header class="header no-print">
+      <!-- Cabeçalho (agora aparece na impressão também) -->
+      <header class="header">
         <div class="logo-circle">BS</div>
         <div class="header-text">
           <div class="header-title">
@@ -23,14 +23,14 @@
         </div>
       </header>
 
-      <!-- Chips -->
+      <!-- Chips (somem no PDF) -->
       <div class="chips no-print">
         <div class="chip chip-primary">🎫 6 ou 7 números por aposta</div>
         <div class="chip">🎯 6 números sorteados</div>
         <div class="chip">👨‍👩‍👧‍👦 Salvaretes only</div>
       </div>
 
-      <!-- Cadastro -->
+      <!-- Cadastro (somente na tela) -->
       <div class="card no-print">
         <div class="card-header">
           <div>
@@ -77,7 +77,7 @@
       </div>
 
       <div class="cards-row">
-        <!-- Apostas cadastradas -->
+        <!-- Apostas cadastradas + resumo dos números sorteados -->
         <div class="card" id="card-apostas">
           <div class="card-header">
             <div>
@@ -95,14 +95,19 @@
             <p class="hint">Nenhuma aposta cadastrada ainda.</p>
           </div>
 
-          <!-- Botão para gerar PDF (impressão) -->
+          <!-- Resumo dos números sorteados (tela + PDF) -->
+          <div class="sorteio-resumo" id="resumo-sorteio-print">
+            Números sorteados: Carol ainda não inseriu.
+          </div>
+
+          <!-- Botão para gerar PDF (somente na tela) -->
           <button id="btn-imprimir" class="btn-secondary no-print" style="margin-top:8px;">
             Gerar PDF das apostas
           </button>
         </div>
 
-        <!-- Frequência -->
-        <div class="card no-print">
+        <!-- Frequência (também aparece no PDF) -->
+        <div class="card">
           <div class="card-header">
             <div>
               <div class="card-title">
@@ -120,7 +125,7 @@
           </div>
         </div>
 
-        <!-- Sorteio -->
+        <!-- Sorteio (somente na tela) -->
         <div class="card no-print">
           <div class="card-header">
             <div>
