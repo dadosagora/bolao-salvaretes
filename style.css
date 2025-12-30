@@ -53,6 +53,34 @@ body {
   z-index: 1;
 }
 
+/*** Top bar ***/
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.top-bar-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.top-bar-add {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: #fff;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 /*** Header ***/
 .header {
   display: flex;
@@ -216,6 +244,7 @@ body {
   color: #022c22;
   font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .btn-secondary {
@@ -227,6 +256,7 @@ body {
   background: #fff;
   font-size: 11px;
   color: #6b7280;
+  cursor: pointer;
 }
 
 .hint {
@@ -242,7 +272,7 @@ body {
   gap: 10px;
 }
 
-/*** Bets list ***/
+/*** Bets list Salvaretes ***/
 .bets-list {
   max-height: none;
   overflow: visible;
@@ -303,6 +333,7 @@ body {
   border-radius: 999px;
   border: 1px solid rgba(0,0,0,0.2);
   background: #fff;
+  cursor: pointer;
 }
 
 .bet-btn.danger {
@@ -375,6 +406,43 @@ body {
   border-top: 1px dashed #e5e7eb;
   font-size: 11px;
   color: var(--muted);
+}
+
+/*** Meus outros bolões ***/
+.outros-list {
+  margin-top: 8px;
+}
+
+.outros-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 7px;
+  border: 1px solid rgba(0,0,0,0.15);
+  margin-bottom: 6px;
+}
+
+.outros-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.outros-nome {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.outros-numeros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.outros-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
 }
 
 /*** Impressão (PDF) ***/
