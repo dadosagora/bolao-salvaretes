@@ -9,7 +9,14 @@
 <body>
   <div class="app">
     <div class="app-inner">
-      <!-- Cabeçalho (agora aparece na impressão também) -->
+
+      <!-- Topo geral: Meus bolões + botão de novo bolão -->
+      <div class="top-bar no-print">
+        <div class="top-bar-title">Meus bolões</div>
+        <button id="btn-add-outro-bolao" class="top-bar-add" title="Adicionar outro bolão">+</button>
+      </div>
+
+      <!-- Cabeçalho principal (aparece no PDF) -->
       <header class="header">
         <div class="logo-circle">BS</div>
         <div class="header-text">
@@ -30,7 +37,7 @@
         <div class="chip">👨‍👩‍👧‍👦 Salvaretes only</div>
       </div>
 
-      <!-- Cadastro (somente na tela) -->
+      <!-- Cadastro Salvaretes (somente na tela) -->
       <div class="card no-print">
         <div class="card-header">
           <div>
@@ -125,7 +132,7 @@
           </div>
         </div>
 
-        <!-- Sorteio (somente na tela) -->
+        <!-- Sorteio Salvaretes (somente na tela) -->
         <div class="card no-print">
           <div class="card-header">
             <div>
@@ -166,6 +173,52 @@
             <div class="hint">O resultado aparecerá aqui depois do cálculo.</div>
           </div>
         </div>
+
+        <!-- Meus outros bolões (somente na tela, não entra no PDF) -->
+        <div class="card no-print" id="card-outros-boloes">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span class="icon">🧾</span> Meus outros bolões
+              </div>
+              <div class="card-subtitle">
+                Registre suas apostas em outros bolões (firma, amigos, etc.).
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span class="dot"></span> Nome do bolão
+            </div>
+            <input id="outro-nome-bolao" class="input-text" type="text" placeholder="Ex.: Bolão da firma, Bolão da rádio" />
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span class="dot"></span> Números apostados (6 a 7 números)
+            </div>
+            <div class="numbers-row">
+              <input class="num-input outro-num" type="number" min="1" max="60" placeholder="01" />
+              <input class="num-input outro-num" type="number" min="1" max="60" placeholder="02" />
+              <input class="num-input outro-num" type="number" min="1" max="60" placeholder="03" />
+              <input class="num-input outro-num" type="number" min="1" max="60" placeholder="04" />
+              <input class="num-input outro-num" type="number" min="1" max="60" placeholder="05" />
+              <input class="num-input outro-num" type="number" min="1" max="60" placeholder="06" />
+              <input class="num-input outro-num" type="number" min="1" max="60" placeholder="07" />
+            </div>
+            <div class="hint">Use para lembrar em quais bolões você apostou e quais números jogou.</div>
+          </div>
+
+          <button id="btn-salvar-outro-bolao" class="btn-primary">
+            salvar bolão
+          </button>
+
+          <div class="outros-list" id="lista-outros-boloes">
+            <p class="hint">Nenhum outro bolão cadastrado ainda.</p>
+          </div>
+        </div>
+
       </div>
 
     </div>
