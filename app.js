@@ -116,7 +116,14 @@ function carregarGrupos() {
     const salvo = localStorage.getItem(STORAGE_KEY_GRUPOS);
     if (!salvo) return;
     const dados = JSON.parse(salvo);
-    if (Array.isArray(dados)) grupos = dados;
+    if (Array.isArray(dados)) {
+      // migração: garantir id e array de apostas
+      grupos = dados.map((g) => {
+        const id = g.id || (Date.now() + Math.random().toString(16).slice(2));
+        const apostasArr = Array.isArray(g.apostas) ? g.apostas : [];
+        return { id, nome: g.nome || "Bolão sem nome", apostas: apostasArr };
+      });
+    }
   } catch (e) {
     console.warn("Não foi possível carregar grupos:", e);
   }
@@ -422,7 +429,6 @@ function atualizarResultadoSalvaretes() {
   }
 
   const divider = document.createElement("div");
-  divider.className = "divider";
   divider.style.margin = "6px 0";
   divider.style.height = "1px";
   divider.style.background = "#e5e7eb";
@@ -529,7 +535,7 @@ function renderizarGrupos() {
     return;
   }
 
-  grupos.forEach((grupo) => {
+  grupos.forEach((grupo, indexGrupo) => {
     const card = document.createElement("div");
     card.className = "grupo-card";
     card.dataset.grupoId = grupo.id;
@@ -682,7 +688,9 @@ function renderizarGrupos() {
         excluirBtn.className = "bet-btn danger";
         excluirBtn.textContent = "excluir";
         excluirBtn.addEventListener("click", () => {
-          grupo.apostas = grupo.apostas.filter((ap) => ap.id !== aposta.id);
+          grupos[indexGrupo].apostas = grupos[indexGrupo].apostas.filter(
+            (ap) => ap.id !== aposta.id
+          );
           salvarGrupos();
           renderizarGrupos();
           atualizarResultadoGeral();
@@ -722,13 +730,16 @@ function renderizarGrupos() {
 
     card.appendChild(controles);
 
+    // auto-avanço nos campos do grupo
     setupAutoAdvance(grupoInputs);
 
+    // ver mais / ver menos
     btnToggle.addEventListener("click", () => {
       const expanded = card.classList.toggle("expanded");
       btnToggle.textContent = expanded ? "ver menos" : "ver mais";
     });
 
+    // adicionar aposta neste bolão
     btnAddAposta.addEventListener("click", () => {
       limparMensagemErro();
       try {
@@ -758,10 +769,7 @@ function renderizarGrupos() {
           acertos,
         };
 
-        const idxGrupo = grupos.findIndex((g) => g.id === grupo.id);
-        if (idxGrupo === -1) return;
-
-        grupos[idxGrupo].apostas.push(apostaNova);
+        grupos[indexGrupo].apostas.push(apostaNova);
         salvarGrupos();
         renderizarGrupos();
         atualizarResultadoGeral();
@@ -773,6 +781,7 @@ function renderizarGrupos() {
       }
     });
 
+    // PDF deste grupo
     btnPdfGrupo.addEventListener("click", () => {
       setActiveTab("outros");
 
@@ -800,6 +809,7 @@ function renderizarGrupos() {
       }, 500);
     });
 
+    // excluir grupo
     btnExcluirGrupo.addEventListener("click", () => {
       if (
         !confirm(
@@ -807,7 +817,7 @@ function renderizarGrupos() {
         )
       )
         return;
-      grupos = grupos.filter((g) => g.id !== grupo.id);
+      grupos = grupos.filter((_, idx) => idx !== indexGrupo);
       salvarGrupos();
       renderizarGrupos();
       atualizarResultadoGeral();
@@ -839,6 +849,7 @@ function atualizarResultadoGeral() {
 
   const linhas = [];
 
+  // Salvaretes
   apostas.forEach((a) => {
     if (typeof a.acertos !== "number") return;
     linhas.push({
@@ -849,6 +860,7 @@ function atualizarResultadoGeral() {
     });
   });
 
+  // Grupos
   grupos.forEach((grupo) => {
     grupo.apostas.forEach((ap, idx) => {
       if (typeof ap.acertos !== "number") return;
