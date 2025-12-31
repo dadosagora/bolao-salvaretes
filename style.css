@@ -86,7 +86,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .logo-circle {
@@ -132,7 +132,8 @@ body {
 .chips {
   display: flex;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-top: 6px;
+  margin-bottom: 2px;
   overflow-x: auto;
 }
 
@@ -222,6 +223,7 @@ body {
 .numbers-row {
   display: flex;
   gap: 4px;
+  flex-wrap: nowrap;
 }
 
 .num-input {
