@@ -1,10 +1,4 @@
 // Painel de bolões da Carol
-// - Bolão Salvaretes (regras originais, 6 ou 7 números, frequência, PDF)
-// - Outros bolões: vários grupos, cada um com várias apostas (6 a 13 números)
-// - Números sorteados globais (valem para todos)
-// - Aba de resultado geral (Salvaretes + outros bolões)
-
-//// ELEMENTOS BÁSICOS
 
 // Salvaretes
 const nomeInput = document.getElementById("nome-participante");
@@ -45,9 +39,9 @@ const STORAGE_KEY_SALVARETES = "bolaoSalvaretes_v1";
 const STORAGE_KEY_GRUPOS = "bolaoGrupos_v1";
 
 // Estado
-let apostas = []; // Salvaretes: { id, nome, numeros:[], acertos: number|null }
-let grupos = [];  // Outros bolões: { id, nome, apostas:[{id, descricao, numeros:[], acertos:null}] }
-let numerosSorteioAtual = null; // [6 numeros] ou null
+let apostas = [];
+let grupos = [];
+let numerosSorteioAtual = null;
 
 //// UTILITÁRIOS DE ERRO
 
@@ -63,7 +57,7 @@ function mostrarErro(msg) {
   mensagemErroEl.style.color = "#f87171";
 }
 
-//// AUTO-AVANÇAR CAMPOS NUMÉRICOS (2 dígitos)
+//// AUTO-AVANÇAR CAMPOS NUMÉRICOS
 
 function setupAutoAdvance(inputs) {
   inputs.forEach((input, idx) => {
@@ -85,7 +79,6 @@ function setupAutoAdvance(inputs) {
   });
 }
 
-// Aplicar nos campos fixos
 setupAutoAdvance(apostaInputs);
 setupAutoAdvance(sorteioInputs);
 
@@ -158,7 +151,6 @@ function obterNumerosDeInputs(inputs, contextoTexto) {
   return numeros.sort((a, b) => a - b);
 }
 
-// Aposta Salvaretes (6 a 7 números)
 function obterNumerosApostaSalvaretes() {
   const numeros = obterNumerosDeInputs(
     apostaInputs,
@@ -170,7 +162,6 @@ function obterNumerosApostaSalvaretes() {
   return numeros;
 }
 
-// Números do sorteio (exatamente 6)
 function obterNumerosSorteio() {
   const valores = sorteioInputs.map((input) => input.value.trim());
 
@@ -218,7 +209,6 @@ tabButtons.forEach((btn) => {
   });
 });
 
-// Botão "+" leva para a aba de outros bolões e foca o nome do grupo
 if (btnAddGrupoTop) {
   btnAddGrupoTop.addEventListener("click", () => {
     setActiveTab("outros");
@@ -229,7 +219,7 @@ if (btnAddGrupoTop) {
   });
 }
 
-//// LISTA DE APOSTAS SALVARETES
+//// LISTA SALVARETES
 
 function atualizarListaApostasSalvaretes() {
   if (!listaApostasEl || !totalApostasEl) return;
@@ -349,7 +339,7 @@ function excluirApostaSalvaretes(id) {
   atualizarResultadoGeral();
 }
 
-//// RESUMO SORTEIO (linha embaixo das apostas Salvaretes)
+//// RESUMO SORTEIO
 
 function atualizarResumoSorteioPrint() {
   if (!resumoSorteioEl) return;
@@ -368,7 +358,7 @@ function atualizarResumoSorteioPrint() {
   }
 }
 
-//// RESULTADO DO BOLÃO SALVARETES
+//// RESULTADO SALVARETES
 
 function atualizarResultadoSalvaretes() {
   if (!resultadoSalvaretesEl) return;
@@ -466,7 +456,7 @@ function atualizarResultadoSalvaretes() {
   resultadoSalvaretesEl.appendChild(resumoEl);
 }
 
-//// FREQUÊNCIA NÚMEROS SALVARETES
+//// FREQUÊNCIA SALVARETES
 
 function atualizarFrequenciaNumerosSalvaretes() {
   if (!listaFrequenciaEl || !totalNumerosUsadosEl) return;
@@ -523,7 +513,7 @@ function atualizarFrequenciaNumerosSalvaretes() {
   });
 }
 
-//// OUTROS BOLÕES (GRUPOS) – COM VER MAIS / VER MENOS
+//// OUTROS BOLÕES (GRUPOS) – COM VER MAIS / VER MENOS E ATÉ 20 NÚMEROS
 
 function renderizarGrupos() {
   if (!listaGruposEl) return;
@@ -544,7 +534,6 @@ function renderizarGrupos() {
     card.className = "grupo-card";
     card.dataset.grupoId = grupo.id;
 
-    // Cabeçalho resumido
     const header = document.createElement("div");
     header.className = "grupo-header";
 
@@ -567,11 +556,10 @@ function renderizarGrupos() {
       "Toque em “ver mais” para cadastrar e ver as apostas deste bolão.";
     card.appendChild(sub);
 
-    // Área de detalhes (formulário + apostas) - começa fechada
     const detalhes = document.createElement("div");
     detalhes.className = "grupo-detalhes";
 
-    // Form para nova aposta
+    // descrição
     const fieldDesc = document.createElement("div");
     fieldDesc.className = "field";
 
@@ -582,25 +570,25 @@ function renderizarGrupos() {
     const inputDesc = document.createElement("input");
     inputDesc.type = "text";
     inputDesc.className = "input-text grupo-descricao";
-    inputDesc.placeholder = "Ex.: Cota 01, Jogo 10 números, Aposta da Carol";
+    inputDesc.placeholder = "Ex.: Cota 01, Jogo 20 números, Aposta da Carol";
 
     fieldDesc.appendChild(labelDesc);
     fieldDesc.appendChild(inputDesc);
     detalhes.appendChild(fieldDesc);
 
+    // números (até 20)
     const fieldNums = document.createElement("div");
     fieldNums.className = "field";
 
     const labelNums = document.createElement("div");
     labelNums.className = "field-label";
     labelNums.innerHTML =
-      '<span class="dot"></span> Números da aposta (6 a 13 números de 1 a 60)';
+      '<span class="dot"></span> Números da aposta (6 a 20 números de 1 a 60)';
     const rowNums = document.createElement("div");
     rowNums.className = "numbers-row";
 
-    // 13 campos numéricos (pode usar 6, 7, 10, 13, etc.)
     const grupoInputs = [];
-    for (let i = 0; i < 13; i++) {
+    for (let i = 0; i < 20; i++) {
       const input = document.createElement("input");
       input.type = "number";
       input.min = "1";
@@ -622,13 +610,11 @@ function renderizarGrupos() {
 
     detalhes.appendChild(fieldNums);
 
-    // Botão adicionar aposta
     const btnAddAposta = document.createElement("button");
     btnAddAposta.className = "btn-primary";
     btnAddAposta.textContent = "adicionar aposta neste bolão";
     detalhes.appendChild(btnAddAposta);
 
-    // Lista de apostas do grupo
     const listaApostasGrupo = document.createElement("div");
     listaApostasGrupo.className = "bets-list";
     listaApostasGrupo.style.marginTop = "8px";
@@ -715,7 +701,6 @@ function renderizarGrupos() {
     detalhes.appendChild(listaApostasGrupo);
     card.appendChild(detalhes);
 
-    // Controles do grupo (ver mais, PDF, excluir)
     const controles = document.createElement("div");
     controles.className = "grupo-controles";
 
@@ -737,18 +722,13 @@ function renderizarGrupos() {
 
     card.appendChild(controles);
 
-    // Listeners específicos do grupo
-
-    // Auto-advance nos campos recém-criados
     setupAutoAdvance(grupoInputs);
 
-    // Ver mais / ver menos
     btnToggle.addEventListener("click", () => {
       const expanded = card.classList.toggle("expanded");
       btnToggle.textContent = expanded ? "ver menos" : "ver mais";
     });
 
-    // Adicionar aposta neste grupo
     btnAddAposta.addEventListener("click", () => {
       limparMensagemErro();
       try {
@@ -756,8 +736,8 @@ function renderizarGrupos() {
           grupoInputs,
           "na aposta deste bolão"
         );
-        if (numeros.length > 13) {
-          throw new Error("Use no máximo 13 números por aposta neste bolão.");
+        if (numeros.length > 20) {
+          throw new Error("Use no máximo 20 números por aposta neste bolão.");
         }
 
         const descricao = inputDesc.value.trim();
@@ -786,7 +766,6 @@ function renderizarGrupos() {
         renderizarGrupos();
         atualizarResultadoGeral();
 
-        // Limpar campos
         inputDesc.value = "";
         grupoInputs.forEach((i) => (i.value = ""));
       } catch (err) {
@@ -794,12 +773,9 @@ function renderizarGrupos() {
       }
     });
 
-    // PDF deste grupo
     btnPdfGrupo.addEventListener("click", () => {
-      // Ativa aba de outros bolões
       setActiveTab("outros");
 
-      // Marca apenas este grupo para impressão
       const todosGrupos = Array.from(
         document.querySelectorAll(".grupo-card")
       );
@@ -813,8 +789,6 @@ function renderizarGrupos() {
         });
       }
       card.classList.add("print-target");
-
-      // Garante que os detalhes estejam expandidos na impressão
       card.classList.add("expanded");
 
       window.print();
@@ -826,7 +800,6 @@ function renderizarGrupos() {
       }, 500);
     });
 
-    // Excluir grupo
     btnExcluirGrupo.addEventListener("click", () => {
       if (
         !confirm(
@@ -866,7 +839,6 @@ function atualizarResultadoGeral() {
 
   const linhas = [];
 
-  // Salvaretes
   apostas.forEach((a) => {
     if (typeof a.acertos !== "number") return;
     linhas.push({
@@ -877,7 +849,6 @@ function atualizarResultadoGeral() {
     });
   });
 
-  // Grupos
   grupos.forEach((grupo) => {
     grupo.apostas.forEach((ap, idx) => {
       if (typeof ap.acertos !== "number") return;
@@ -934,7 +905,7 @@ function atualizarResultadoGeral() {
   });
 }
 
-//// CÁLCULO DE ACERTOS (TODOS OS BOLÕES)
+//// CÁLCULO DE ACERTOS
 
 function aplicarAcertosParaTodosOsBoloes() {
   if (
@@ -947,19 +918,17 @@ function aplicarAcertosParaTodosOsBoloes() {
 
   const setSorteio = new Set(numerosSorteioAtual);
 
-  // Salvaretes
   apostas = apostas.map((a) => {
     const acertos = a.numeros.filter((n) => setSorteio.has(n)).length;
     return { ...a, acertos };
   });
 
-  // Grupos
   grupos = grupos.map((g) => {
-    const apostasAtualizadas = g.apostas.map((ap) => {
+    const aps = g.apostas.map((ap) => {
       const acertos = ap.numeros.filter((n) => setSorteio.has(n)).length;
       return { ...ap, acertos };
     });
-    return { ...g, apostas: apostasAtualizadas };
+    return { ...g, apostas: aps };
   });
 
   salvarApostas();
@@ -1037,7 +1006,6 @@ if (btnLimpar) {
   });
 }
 
-// PDF Salvaretes
 if (btnImprimir) {
   btnImprimir.addEventListener("click", () => {
     setActiveTab("salvaretes");
@@ -1075,7 +1043,7 @@ if (btnLimparSorteio) {
   });
 }
 
-//// EVENTOS: CRIAR NOVO GRUPO
+//// EVENTOS: CRIAR GRUPO
 
 if (btnCriarGrupo) {
   btnCriarGrupo.addEventListener("click", () => {
@@ -1116,5 +1084,4 @@ atualizarResumoSorteioPrint();
 renderizarGrupos();
 atualizarResultadoGeral();
 
-// Aba padrão
 setActiveTab("salvaretes");
