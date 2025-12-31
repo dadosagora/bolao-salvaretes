@@ -223,7 +223,12 @@ body {
 .numbers-row {
   display: flex;
   gap: 4px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+}
+
+/* Campos numéricos dos outros bolões (20 números) */
+.grupo-detalhes .numbers-row .grupo-num {
+  width: calc((100% - (9 * 4px)) / 10);
 }
 
 .num-input {
@@ -291,12 +296,14 @@ body {
   background: transparent;
   color: #6b7280;
   cursor: pointer;
+  font-weight: 600;   /* deixa todas em negrito */
 }
 
 .tab-button.active {
   border-color: #22c55e;
   background: #dcfce7;
   color: #065f46;
+  font-weight: 700;   /* ativa mais “forte” */
 }
 
 .tab-panel {
