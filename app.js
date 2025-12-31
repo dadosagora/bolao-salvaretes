@@ -523,7 +523,7 @@ function atualizarFrequenciaNumerosSalvaretes() {
   });
 }
 
-//// OUTROS BOLÕES (GRUPOS)
+//// OUTROS BOLÕES (GRUPOS) – COM VER MAIS / VER MENOS
 
 function renderizarGrupos() {
   if (!listaGruposEl) return;
@@ -544,7 +544,7 @@ function renderizarGrupos() {
     card.className = "grupo-card";
     card.dataset.grupoId = grupo.id;
 
-    // Cabeçalho
+    // Cabeçalho resumido
     const header = document.createElement("div");
     header.className = "grupo-header";
 
@@ -564,8 +564,12 @@ function renderizarGrupos() {
     const sub = document.createElement("div");
     sub.className = "grupo-subtitle";
     sub.textContent =
-      "Cadastre aqui as apostas (bilhetes) desse bolão. Aceita de 6 até 13 números por aposta.";
+      "Toque em “ver mais” para cadastrar e ver as apostas deste bolão.";
     card.appendChild(sub);
+
+    // Área de detalhes (formulário + apostas) - começa fechada
+    const detalhes = document.createElement("div");
+    detalhes.className = "grupo-detalhes";
 
     // Form para nova aposta
     const fieldDesc = document.createElement("div");
@@ -582,7 +586,7 @@ function renderizarGrupos() {
 
     fieldDesc.appendChild(labelDesc);
     fieldDesc.appendChild(inputDesc);
-    card.appendChild(fieldDesc);
+    detalhes.appendChild(fieldDesc);
 
     const fieldNums = document.createElement("div");
     fieldNums.className = "field";
@@ -616,13 +620,13 @@ function renderizarGrupos() {
       "Use apenas os campos necessários. Sem números repetidos na mesma aposta.";
     fieldNums.appendChild(hintNums);
 
-    card.appendChild(fieldNums);
+    detalhes.appendChild(fieldNums);
 
     // Botão adicionar aposta
     const btnAddAposta = document.createElement("button");
     btnAddAposta.className = "btn-primary";
     btnAddAposta.textContent = "adicionar aposta neste bolão";
-    card.appendChild(btnAddAposta);
+    detalhes.appendChild(btnAddAposta);
 
     // Lista de apostas do grupo
     const listaApostasGrupo = document.createElement("div");
@@ -708,11 +712,16 @@ function renderizarGrupos() {
       });
     }
 
-    card.appendChild(listaApostasGrupo);
+    detalhes.appendChild(listaApostasGrupo);
+    card.appendChild(detalhes);
 
-    // Controles do grupo (PDF, excluir)
+    // Controles do grupo (ver mais, PDF, excluir)
     const controles = document.createElement("div");
     controles.className = "grupo-controles";
+
+    const btnToggle = document.createElement("button");
+    btnToggle.className = "btn-secondary";
+    btnToggle.textContent = "ver mais";
 
     const btnPdfGrupo = document.createElement("button");
     btnPdfGrupo.className = "btn-secondary";
@@ -720,17 +729,24 @@ function renderizarGrupos() {
 
     const btnExcluirGrupo = document.createElement("button");
     btnExcluirGrupo.className = "btn-secondary btn-danger";
-    btnExcluirGrupo.style.marginLeft = "6px";
     btnExcluirGrupo.textContent = "Excluir bolão";
 
+    controles.appendChild(btnToggle);
     controles.appendChild(btnPdfGrupo);
     controles.appendChild(btnExcluirGrupo);
+
     card.appendChild(controles);
 
     // Listeners específicos do grupo
 
     // Auto-advance nos campos recém-criados
     setupAutoAdvance(grupoInputs);
+
+    // Ver mais / ver menos
+    btnToggle.addEventListener("click", () => {
+      const expanded = card.classList.toggle("expanded");
+      btnToggle.textContent = expanded ? "ver menos" : "ver mais";
+    });
 
     // Adicionar aposta neste grupo
     btnAddAposta.addEventListener("click", () => {
@@ -739,7 +755,7 @@ function renderizarGrupos() {
         const numeros = obterNumerosDeInputs(
           grupoInputs,
           "na aposta deste bolão"
-        ); // aqui aceitamos 6 a 13 sem limite superior extra
+        );
         if (numeros.length > 13) {
           throw new Error("Use no máximo 13 números por aposta neste bolão.");
         }
@@ -791,19 +807,18 @@ function renderizarGrupos() {
         g.classList.remove("print-target", "print-filtered");
       });
 
-      // Se houver mais de um grupo, marcamos os outros como filtrados
       if (todosGrupos.length > 1) {
         todosGrupos.forEach((g) => {
-          if (g !== card) {
-            g.classList.add("print-filtered");
-          }
+          if (g !== card) g.classList.add("print-filtered");
         });
       }
       card.classList.add("print-target");
 
+      // Garante que os detalhes estejam expandidos na impressão
+      card.classList.add("expanded");
+
       window.print();
 
-      // Depois que sair da impressão, removemos as classes
       setTimeout(() => {
         todosGrupos.forEach((g) => {
           g.classList.remove("print-target", "print-filtered");
@@ -887,7 +902,6 @@ function atualizarResultadoGeral() {
     return;
   }
 
-  // Ordenar por acertos (desc) e depois por nome de bolão
   linhas.sort((a, b) => {
     if (b.acertos !== a.acertos) return b.acertos - a.acertos;
     if (a.bolao !== b.bolao) return a.bolao.localeCompare(b.bolao);
@@ -928,7 +942,6 @@ function aplicarAcertosParaTodosOsBoloes() {
     !Array.isArray(numerosSorteioAtual) ||
     numerosSorteioAtual.length !== 6
   ) {
-    // nada a fazer
     return;
   }
 
