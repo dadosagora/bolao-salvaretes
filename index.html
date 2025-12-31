@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Bolão Salvaretes</title>
+  <title>Bolões da Carol</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -16,28 +16,30 @@
         <button id="btn-add-grupo" class="top-bar-add" title="Adicionar novo grupo de aposta">+</button>
       </div>
 
-      <!-- Cabeçalho principal (aparece no PDF) -->
-      <header class="header">
-        <div class="logo-circle">BS</div>
-        <div class="header-text">
-          <div class="header-title">
-            Bolão Salvaretes
-            <span class="small">Mega da Virada</span>
+      <!-- CARD: Cabeçalho principal (aparece no PDF) -->
+      <div class="card">
+        <header class="header">
+          <div class="logo-circle">BS</div>
+          <div class="header-text">
+            <div class="header-title">
+              Bolões da Carol
+              <span class="small">Mega da Virada</span>
+            </div>
+            <div class="header-subtitle">
+              Gerencie as apostas da família e dos outros bolões em um lugar só.
+            </div>
           </div>
-          <div class="header-subtitle">
-            Cadastre as apostas da família e dos seus outros bolões e veja quem acertou mais números.
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <!-- Chips (somem no PDF) -->
-      <div class="chips no-print">
-        <div class="chip chip-primary">🎫 6 a 13 números por aposta</div>
-        <div class="chip">🎯 6 números sorteados</div>
-        <div class="chip">👨‍👩‍👧‍👦 Salvaretes + outros bolões</div>
+        <!-- Chips (somem no PDF) -->
+        <div class="chips no-print">
+          <div class="chip chip-primary">🎫 6 a 20 números por aposta</div>
+          <div class="chip">🎯 6 números sorteados</div>
+          <div class="chip">👨‍👩‍👧‍👦 Salvaretes + outros bolões</div>
+        </div>
       </div>
 
-      <!-- Números sorteados (GLOBAL para todos os bolões) -->
+      <!-- CARD: Números sorteados (GLOBAL) -->
       <div class="card no-print">
         <div class="card-header">
           <div>
@@ -202,7 +204,7 @@
       <!-- ABA: OUTROS BOLÕES -->
       <div class="tab-panel" id="tab-outros">
 
-        <!-- Criar novo grupo de bolão -->
+        <!-- CARD: Criar novo grupo de bolão -->
         <div class="card no-print">
           <div class="card-header">
             <div>
@@ -227,9 +229,22 @@
           </button>
         </div>
 
-        <!-- Lista de grupos -->
-        <div id="lista-grupos">
-          <p class="hint">Nenhum outro bolão cadastrado ainda.</p>
+        <!-- CARD: Bolões criados -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span class="icon">📂</span> Meus outros bolões
+              </div>
+              <div class="card-subtitle">
+                Veja e gerencie os bolões que você criou além do Salvaretes.
+              </div>
+            </div>
+          </div>
+
+          <div id="lista-grupos">
+            <p class="hint">Nenhum outro bolão cadastrado ainda.</p>
+          </div>
         </div>
 
       </div>
@@ -243,7 +258,7 @@
                 <span class="icon">📈</span> Resultado geral dos bolões
               </div>
               <div class="card-subtitle">
-                visão consolidada de todas as apostas (Salvaretes + outros bolões).
+                Visão consolidada de todas as apostas (Salvaretes + outros bolões).
               </div>
             </div>
           </div>
