@@ -265,11 +265,44 @@ body {
   margin-top: 3px;
 }
 
-/*** Cards em coluna (um embaixo do outro) ***/
-.cards-row {
+/*** Sorteio ***/
+.numbers-row-6 .num-input {
+  width: calc((100% - 5 * 4px) / 6);
+}
+
+.btn-calc { margin-top: 8px; }
+
+/*** Abas ***/
+.tab-nav {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  margin: 12px 0 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  padding-bottom: 4px;
+}
+
+.tab-button {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  border-color: #22c55e;
+  background: #dcfce7;
+  color: #065f46;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
 }
 
 /*** Bets list Salvaretes ***/
@@ -308,6 +341,7 @@ body {
 
 .bet-numbers {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   margin-top: 4px;
   margin-bottom: 4px;
@@ -341,20 +375,7 @@ body {
   color: #7f1d1d;
 }
 
-/*** Sorteio ***/
-.numbers-row-6 .num-input {
-  width: calc((100% - 5 * 4px) / 6);
-}
-
-.btn-calc { margin-top: 8px; }
-
-.divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 6px 0;
-}
-
-/*** Result ***/
+/*** Resultado Salvaretes ***/
 .result-title {
   font-size: 12px;
   font-weight: 700;
@@ -363,6 +384,7 @@ body {
 .result-line {
   display: flex;
   justify-content: space-between;
+  margin-top: 2px;
 }
 
 .result-badge {
@@ -372,7 +394,7 @@ body {
   border: 1px solid rgba(0,0,0,0.2);
 }
 
-/*** Frequência ***/
+/*** Frequência Salvaretes ***/
 .freq-list {
   display: flex;
   flex-wrap: wrap;
@@ -399,7 +421,7 @@ body {
   color: var(--muted);
 }
 
-/*** Resumo dos números sorteados ***/
+/*** Resumo dos números sorteados Salvaretes ***/
 .sorteio-resumo {
   margin-top: 8px;
   padding-top: 6px;
@@ -409,40 +431,88 @@ body {
 }
 
 /*** Meus outros bolões ***/
-.outros-list {
-  margin-top: 8px;
+#lista-grupos {
+  margin-top: 4px;
 }
 
-.outros-item {
+.grupo-card {
   background: #fff;
-  border-radius: 10px;
-  padding: 7px;
+  border-radius: 18px;
+  padding: 10px 10px 12px;
+  margin-bottom: 10px;
   border: 1px solid rgba(0,0,0,0.15);
-  margin-bottom: 6px;
 }
 
-.outros-header {
+.grupo-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 6px;
 }
 
-.outros-nome {
-  font-size: 13px;
+.grupo-nome {
+  font-size: 14px;
   font-weight: 600;
 }
 
-.outros-numeros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+.grupo-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.2);
+  color: #6b7280;
+}
+
+.grupo-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.grupo-controles {
+  margin-top: 6px;
+}
+
+.grupo-controles .btn-secondary {
+  width: auto;
+  padding-inline: 10px;
+  font-size: 10px;
+  margin-top: 0;
+}
+
+.grupo-controles .btn-danger {
+  border-color: #ef4444;
+  color: #7f1d1d;
+}
+
+/*** Resultado geral ***/
+.resultado-geral-list {
   margin-top: 4px;
 }
 
-.outros-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 4px;
+.resultado-geral-header,
+.resultado-geral-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 0.8fr 0.7fr;
+  gap: 4px;
+  font-size: 11px;
+  align-items: center;
+}
+
+.resultado-geral-header {
+  font-weight: 600;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 3px;
+}
+
+.resultado-geral-row {
+  padding: 3px 0;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.resultado-geral-row.highlight {
+  background: #dcfce7;
 }
 
 /*** Impressão (PDF) ***/
@@ -465,5 +535,19 @@ body {
 
   .no-print {
     display: none !important;
+  }
+
+  /* Na aba "Outros bolões", imprimir apenas o grupo marcado como alvo */
+  .grupo-card {
+    display: block;
+  }
+
+  .grupo-card.print-target {
+    display: block;
+  }
+
+  /* Se houver algum grupo marcado como print-target, escondemos os outros */
+  .grupo-card.print-filtered {
+    display: none;
   }
 }
